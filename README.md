@@ -15,7 +15,9 @@
  How to export:
  Say you have these layer sets:
  image1
+ 
  |_ layer1
+ 
  |_ layer2
  |_ layer3
  noexport
