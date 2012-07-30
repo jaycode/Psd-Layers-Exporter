@@ -13,7 +13,7 @@
  6. You can exclude some layers from exports too.
 
  How to export:
- Say if you have these layer sets:
+ Say you have these layer sets:
  image1
  |_ layer1
  |_ layer2
@@ -31,7 +31,7 @@
  noexport
  |_ layer10
 
- Then when you run this script, you will get the following:
+When you run this script, you will get the following:
  1. Exported files are image1,png, xrepeat.png, yrepeat.png, xyrepeat.png. noexport layer sets are not processed.
     The name could be anything, obviously.
  2. image1.png will be filled with layer1, layer2, and layer3 merged together, and yrepeat.png will be the same only
