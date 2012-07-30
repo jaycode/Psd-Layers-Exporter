@@ -29,7 +29,7 @@
  
  |_ layer5
  
- xrepeat:1:-
+ xrepeat:10:-
  
  |_ layer6
  
@@ -52,7 +52,7 @@ When you run this script, you will get the following:
     The name could be anything, obviously.
  2. image1.png will be filled with layer1, layer2, and layer3 merged together, and yrepeat.png will be the same only
     with layer7 and layer8.
- 3. xrepeat.png will have 1px width and height as big as the combination of images inside of it. The idea is
+ 3. xrepeat.png will have 10px width and height as big as the combination of images inside of it. The idea is
     you should be able to use it with x-repeat ed background.
  4. yrepeat.png will have 2px height.
  5. xyrepeat.png will have 10px width x 10px height.
