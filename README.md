@@ -14,23 +14,37 @@
 
  How to export:
  Say you have these layer sets:
+ 
  image1
  
  |_ layer1
  
  |_ layer2
+ 
  |_ layer3
+ 
  noexport
+ 
  |_ layer4
+ 
  |_ layer5
+ 
  xrepeat:1:-
+ 
  |_ layer6
+ 
  yrepeat:-:2
+ 
  |_ layer7
+ 
  |_ layer8
+ 
  xyrepeat:10:10
+ 
  |_ layer9
+ 
  noexport
+ 
  |_ layer10
 
 When you run this script, you will get the following:
