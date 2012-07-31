@@ -4,6 +4,8 @@
  This script is designed to handle just that. Now you can simply open the document in photoshop,
  then double click this script, and walla all the layers are exported in a folder you specify.
 
+ View it in action here: http://www.youtube.com/watch?v=Yx6R-UA9Vlg
+
  Features:
  1. Group by layer sets then export each layer sets.
  2. Multiple layer in a layer set? Can do.
