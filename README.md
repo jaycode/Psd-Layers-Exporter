@@ -13,6 +13,7 @@
  4. Layer sets with opacity? Also can.
  5. You can also export repeated images by defining width or height of layer set to be exported.
  6. You can exclude some layers from exports too.
+ 7. You can export to different file types like jpeg and gif (v.1.2.3).
 
  How to export:
  Say you have these layer sets:
