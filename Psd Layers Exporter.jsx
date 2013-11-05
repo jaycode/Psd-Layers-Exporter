@@ -4,7 +4,7 @@
  * @author Teguh Wijaya <jay@teguhwijaya.com>
  * @link http://www.teguhwijaya.com/
  * @copyright Copyright &copy; 2012 Teguh Wijaya
- * @version 1.2.3
+ * @version 1.2.4
  * Thanks to Brett Bibby (brettb@unity3d.com) for introducing me to jsx coding.
  */
 
@@ -29,7 +29,10 @@
  v.1.2.3
  8. Export as jpeg or gif
 
-Layerset naming guide: [layerset name]:[w]:[h]:[type]:[startX]:[startY];[[w]:[h]:[type]:[startX]:[startY]];...
+ v.1.2.4
+ 9. Will only export when file not found.
+
+Layerset naming guide: [layerset name]:[w]:[h]:[type]
    This layerset will repeat vertically, looping the first 2px height from top-left:
    [layerset name]:-:2
 
@@ -62,6 +65,7 @@ var duppedPsd;
 var destinationFolder;
 var objectId = 0;
 var debugFile;
+var existingFiles = '';
 
 // run the exporter
 main();
@@ -82,16 +86,20 @@ function main()
 	}
 
 	// ask for where the exported files should go
-	destinationFolder = Folder(app.activeDocument.filePath).selectDlg("Choose the destination for export.");
+	destinationFolder = Folder(app.activeDocument.fullName.path).selectDlg("Choose the destination for export.");
 	if(!destinationFolder)
 	{
 		return;
 	}
 
+
 	debugFile = new File(destinationFolder + "/debug.txt");
 	debugFile.open('w');
 	debugFile.writeln('start');
 
+	folder = new Folder(destinationFolder);
+	existingFiles = folder.getFiles().toString();
+	debugFile.writeln('all existingFiles: ' + existingFiles);
 
 	// cache useful variables
 	sourcePsdName = app.activeDocument.name; 
@@ -124,6 +132,35 @@ function main()
 	debugFile.close();
 }
 
+
+function filepathFromName(name) {
+	var nameArray = name.split(':');
+	var name = nameArray[0];
+	var width = nameArray[1];
+	var height = nameArray[2];
+	var type = nameArray[3];
+
+	if (typeof(type) == 'undefined') {
+		type = 'png';
+	}
+	var ext = type;
+
+	if (type.indexOf('jpg') !== -1 || type.indexOf('jpeg') !== -1) {
+		ext = 'jpg';
+	}
+	else if (type == 'gif') {
+	}
+	else {
+		ext = 'png';
+	}
+	return destinationFolder + "/" + name + "." + ext;
+}
+
+function fileExists(needle) {
+	var rx = new RegExp(needle+"(.)");
+	return rx.test(existingFiles);
+}
+
 function exportLayerSets(obj, level)
 {
 	var levelText = "";
@@ -146,7 +183,16 @@ function exportLayerSets(obj, level)
 			if (obj.layerSets[i].layerSets.length == 0) {
 				// exports
 				debugFile.writeln(levelText+"layerSet does not contain another layer set");
-				exportLayerSet(obj.layerSets[i], levelText);
+
+				var filepath = filepathFromName(name);
+				debugFile.writeln(levelText+'checking if ' + filepath + ' exists');
+				if (!fileExists(filepath)) {
+					debugFile.writeln(levelText+'does not exist, let\'s create it!');
+					exportLayerSet(obj.layerSets[i], levelText);
+				}
+				else {
+					debugFile.writeln(levelText+'not saving because file existed.');
+				}
 			}
 			else {
 				// if it contains other layer sets,
@@ -164,10 +210,6 @@ function exportLayerSets(obj, level)
 function exportLayerSet(layerSet, levelText)
 {
 	levelText += "> ";
-	// todo: 
-	// exportSyntaxes variable contains multiple export syntaxes separated by semi-colons
-	// var exportSyntaxes
-
 	// filename could be "name:-:10" to make an image with layer width and 10px height.
 	var nameArray = layerSet.name.split(':')
 	debugFile.writeln(levelText+'export layer set '+layerSet.name+': setup variables');
@@ -189,7 +231,7 @@ function exportLayerSet(layerSet, levelText)
 		}
 		debugFile.writeln(levelText+'about to save to scene');
 		saveScene(duppedPsd.duplicate(), name, width, height, levelText, type);
-		debugFile.writeln(levelText+'saved. Now hide all artLayers inside this layerSet');
+		debugFile.writeln(levelText+'Now hide all artLayers inside this layerSet');
 
 		for (var j = 0; j < layerSet.artLayers.length; j++) {
 			debugFile.writeln(levelText+'turning layer ' + artLayer.name + ' to hidden');
@@ -235,34 +277,36 @@ function saveScene(psd, fileName, fileWidth, fileHeight, levelText, type)
 		debugFile.writeln(levelText+'use png save options');
 	}
 
+	// save the image
+	var file = new File(destinationFolder + "/" + fileName + "." + ext);
+
 	debugFile.writeln(levelText+'mergeVisibleLayers');
 	// we should now have a single art layer if all went well
 	//psd.flatten();
 	psd.mergeVisibleLayers();
 
 	psd.trim(TrimType.TRANSPARENT);
-	
-	var width = psd.width.value;
+
+	var width = new UnitValue(psd.width);
 	if (fileWidth != null) {
-		width = fileWidth;
+		width = new UnitValue(fileWidth, 'px');
 	}
 
-	var height = psd.height.value;
+	var height = new UnitValue(psd.height);
 	if (fileHeight != null) {
-		height = fileHeight;
+		height = new UnitValue(fileHeight, 'px');
 	}
 	
 	if (fileWidth != null || fileHeight != null) {
-		debugFile.writeln(levelText+'crop with width ' + width + ' and height ' + height);
+		debugFile.writeln(levelText+'resizeCanvas with width ' + width + ' and height ' + height);
 		psd.resizeCanvas(width, height, AnchorPosition.TOPLEFT);
 	}
-	
+
 	debugFile.writeln(levelText+"about to save the file");
-	// save the image
-	var file = new File(destinationFolder + "/" + fileName + "." + ext);
 	psd.saveAs(file, saveOptions, true, Extension.LOWERCASE);
-	psd.close(SaveOptions.DONOTSAVECHANGES);
 	debugFile.writeln(levelText+'done saving scene');
+
+	psd.close(SaveOptions.DONOTSAVECHANGES);
 }		
 
 function hideAllArtLayersDepr(obj)
